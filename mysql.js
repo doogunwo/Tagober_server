@@ -4,7 +4,7 @@ const conn = {  // mysql 접속 설정
     port: '3306',
     user: 'admin',
     password: 'ehrjsdn123!',
-    database: 'ans3'
+    database: 'sys'
 };
 
 
