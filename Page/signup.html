@@ -51,6 +51,7 @@
 <body>
   <div class="container">
     <h2>Sign Up</h2>
+    <script src="http://code.jquery.com/jquery-latest.js"></script> 
     <form action="/signup" method="POST">
       <div class="form-group">
         <label for="username">Username:</label>
@@ -78,80 +79,36 @@
     </form>
     <script>
              function signup() {
-                
-                // 클라이언트 측 JavaScript 코드
-                                    const signupButton = document.getElementById('signup-button');
+                // 입력된 정보 가져오기
+                        const username = document.getElementById('username').value;
+                        const password = document.getElementById('password').value;
+                        const email = document.getElementById('email').value;
+                        const phone = document.getElementById('phone').value;
+                        const name = document.getElementById('name').value;
+                        let userData = {
+                        username: username,
+                        password: password,
+                        email: email,
+                        phone: phone,
+                        name: name
+                        };
 
-                                    signupButton.addEventListener('click', () => {
-                                    // 회원가입 데이터 수집
-                                    const username = document.getElementById('username').value;
-                                    const password = document.getElementById('password').value;
-                                    const email = document.getElementById('email').value;
-                                    const phone = document.getElementById('phone').value;
-                                    const name = document.getElementById('name').value;
-
-                                    // 회원가입 요청
-                                    $.ajax({
-                                        url: '/signup',
-                                        type: 'POST',
-                                        dataType: 'json',
-                                        data: JSON.stringify({
-                                        username,
-                                        password,
-                                        email,
-                                        phone,
-                                        name,
-                                        }),
-                                        contentType: 'application/json',
-                                        success: function(data) {
-                                        if (data.success) {
-                                            // 회원가입 성공
-                                            // MySQL에 저장 및 메인 화면으로 이동
-                                            $.ajax({
-                                            url: '/save-to-mysql',
-                                            type: 'POST',
-                                            dataType: 'json',
-                                            data: JSON.stringify({
-                                                username,
-                                                email,
-                                                phone,
-                                                name,
-                                            }),
-                                            contentType: 'application/json',
-                                            success: function(data) {
-                                                if (data.success) {
-                                                // MySQL 저장 성공
-                                                // 메인 화면으로 이동
-                                                window.location.href = '/main';
-                                                } else {
-                                                // MySQL 저장 실패
-                                                // 실패 메시지를 받아서 경고창을 띄움
-                                                alert('MySQL 저장 실패: ' + data.message);
-                                                }
-                                            },
-                                            error: function(jqXHR, textStatus, errorThrown) {
-                                                console.error('MySQL 저장 요청 실패:', errorThrown);
-                                                // 예상치 못한 오류 발생
-                                                alert('MySQL 저장 요청 실패');
-                                            }
-                                            });
-                                        } else {
-                                            // 회원가입 실패
-                                            // 실패 메시지를 받아서 경고창을 띄움
-                                            alert('회원가입 실패: ' + data.message);
-                                        }
-                                        },
-                                        error: function(jqXHR, textStatus, errorThrown) {
-                                        console.error('회원가입 요청 실패:', errorThrown);
-                                        // 예상치 못한 오류 발생
-                                        alert('회원가입 요청 실패');
-                                        }
-                                    });
-});
-
-
-
-                
+                        // 서버로 데이터 전송
+                        $.ajax({
+                            url: '/signup',
+                            method: 'POST',
+                            data: JSON.stringify(userData),
+                            contentType: 'application/json',
+                            success: function(response) {
+                                console.log('서버 응답:', response);
+                            },
+                                error: function(error) {
+                                console.error('서버 요청 실패:', error);
+  
+                            }
+                            
+                        });
+      
     }
     </script>
   </div>

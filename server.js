@@ -7,6 +7,7 @@ const path = require('path');
 const mysql = require('mysql');
 const bodyParser = require('body-parser')
 app.use(bodyParser.json()) // for parsing application/json
+
 const connection = mysql.createConnection({
   host: 'ans3.cwmxwotwq2p1.us-east-1.rds.amazonaws.com',
   user: 'admin',
@@ -37,21 +38,18 @@ app.get('/signup', (req, res) => {
 
 
 app.post('/signup', (req, res) => {
-  const { username, password, email, phone, name } = req.body;
-  console.log(req.body);
-  // 회원 정보를 MySQL에 저장
-  const query = `INSERT INTO signup (username, password, email, phone, name) VALUES (?, ?, ?, ?, ?)`;
-  const values = [username, password, email, phone, name];
-
-  connection.query(query, values, (err, result) => {
-    if (err) {
-      console.error('Error saving signup data to MySQL: ', err);
-      res.status(500).send('Error saving signup data');
-      return;
+  // 클라이언트로부터 전송된 데이터 수신
+  let userData = req.body;
+  console.log(userData)
+  // MySQL에 데이터 저장
+  connection.query('INSERT INTO signup (username, password, email, phone, name) VALUES (?, ?, ?, ?, ?)', [userData.username, userData.password, userData.email, userData.phone, userData.name], (error, results, fields) => {
+    if (error) {
+      console.error('MySQL 저장 실패:', error);
+      res.status(500).json({ message: '회원가입에 실패했습니다.' });
+    } else {
+      console.log('MySQL 저장 성공');
+      res.json({ message: '회원가입이 완료되었습니다.' });
     }
-
-    console.log('Signup data saved to MySQL');
-    res.status(200).send('Signup successful');
   });
 });
 
