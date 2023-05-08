@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sign Up</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+      margin-bottom: 10px;
+    }
+
+    .form-group label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+
+    .form-group button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Sign Up</h2>
+    <form action="/signup" method="POST">
+      <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone:</label>
+        <input type="text" id="phone" name="phone" required>
+      </div>
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+      </div>
+      <div class="form-group">
+        <button type="button" id="sign_button"   onclick="signup()">회원 가입</button>
+      </div>
+    </form>
+    <script>
+             function signup() {
+                
+                // 클라이언트 측 JavaScript 코드
+                                    const signupButton = document.getElementById('signup-button');
+
+                                    signupButton.addEventListener('click', () => {
+                                    // 회원가입 데이터 수집
+                                    const username = document.getElementById('username').value;
+                                    const password = document.getElementById('password').value;
+                                    const email = document.getElementById('email').value;
+                                    const phone = document.getElementById('phone').value;
+                                    const name = document.getElementById('name').value;
+
+                                    // 회원가입 요청
+                                    $.ajax({
+                                        url: '/signup',
+                                        type: 'POST',
+                                        dataType: 'json',
+                                        data: JSON.stringify({
+                                        username,
+                                        password,
+                                        email,
+                                        phone,
+                                        name,
+                                        }),
+                                        contentType: 'application/json',
+                                        success: function(data) {
+                                        if (data.success) {
+                                            // 회원가입 성공
+                                            // MySQL에 저장 및 메인 화면으로 이동
+                                            $.ajax({
+                                            url: '/save-to-mysql',
+                                            type: 'POST',
+                                            dataType: 'json',
+                                            data: JSON.stringify({
+                                                username,
+                                                email,
+                                                phone,
+                                                name,
+                                            }),
+                                            contentType: 'application/json',
+                                            success: function(data) {
+                                                if (data.success) {
+                                                // MySQL 저장 성공
+                                                // 메인 화면으로 이동
+                                                window.location.href = '/main';
+                                                } else {
+                                                // MySQL 저장 실패
+                                                // 실패 메시지를 받아서 경고창을 띄움
+                                                alert('MySQL 저장 실패: ' + data.message);
+                                                }
+                                            },
+                                            error: function(jqXHR, textStatus, errorThrown) {
+                                                console.error('MySQL 저장 요청 실패:', errorThrown);
+                                                // 예상치 못한 오류 발생
+                                                alert('MySQL 저장 요청 실패');
+                                            }
+                                            });
+                                        } else {
+                                            // 회원가입 실패
+                                            // 실패 메시지를 받아서 경고창을 띄움
+                                            alert('회원가입 실패: ' + data.message);
+                                        }
+                                        },
+                                        error: function(jqXHR, textStatus, errorThrown) {
+                                        console.error('회원가입 요청 실패:', errorThrown);
+                                        // 예상치 못한 오류 발생
+                                        alert('회원가입 요청 실패');
+                                        }
+                                    });
+});
+
+
+
+                
+    }
+    </script>
+  </div>
+</body>
+</html>
