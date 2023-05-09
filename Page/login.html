@@ -50,6 +50,7 @@
 </head>
 <body>
   <div class="container">
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
     <h2>Login</h2>
     <form action="/login" method="POST">
       <div class="form-group">
@@ -61,9 +62,43 @@
         <input type="password" id="password" name="password" required>
       </div>
       <div class="form-group">
-        <button type="submit">Login</button>
+        <button type="button" id="login_button"   onclick="login()">로그 인</button>
       </div>
     </form>
+    <script>
+      function login(){
+
+
+        let username = document.getElementById('username').value;
+        let password = document.getElementById('password').value;
+
+        let loginData = {
+            username: username,
+            password: password
+          };
+        
+          $.ajax({
+              url: '/login', // 서버 엔드포인트
+              method: 'POST',
+              data: JSON.stringify(loginData), // 데이터를 JSON 문자열로 변환하여 전송
+              contentType: 'application/json',
+              success: function(response) {
+                console.log('서버 응답:', response);
+                // 로그인 성공 후 원하는 동작 수행
+              },
+              error: function(error) {
+                console.error('서버 요청 실패:', error);
+                // 로그인 실패 처리 로직
+              }
+  });
+
+
+
+
+
+      }
+
+    </script>
   </div>
 </body>
 </html>

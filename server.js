@@ -35,7 +35,9 @@ app.get('/login', (req, res) => {
 app.get('/signup', (req, res) => {
   res.sendFile(path.join(__dirname, 'Page', 'signup.html'));
 });
-
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'Page', 'dashboard.html'));
+});
 
 app.post('/signup', (req, res) => {
   // 클라이언트로부터 전송된 데이터 수신
@@ -52,7 +54,46 @@ app.post('/signup', (req, res) => {
     }
   });
 });
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+  
 
+  // MySQL 데이터베이스에서 사용자 정보 검증
+  // 이 예시에서는 간단한 비교를 통해 로그인 검증을 수행합니다.
+  // 실제로는 bcrypt나 passport 등을 사용하여 안전한 방식으로 비밀번호를 검증해야 합니다.
+
+  const query = `SELECT * FROM signup WHERE username = '${username}'`;
+  console.log(query)
+  
+
+  connection.query(query, (err, results) => {
+    if (err) {
+      console.error('MySQL query error: ', err);
+      res.status(500).json({ message: 'Internal Server Error' });
+      return;
+    }
+
+    // 사용자 정보가 존재하는 경우
+    if (results.length > 0) {
+      const user = results[0];
+
+      // 비밀번호가 일치하는 경우
+      if (user.password === password) {
+        res.json({ message: 'Login successful' });
+      } else {
+        res.status(401).json({ message: 'Invalid password' });
+      }
+    } else {
+      // 사용자 정보가 존재하지 않는 경우
+      res.status(404).json({ message: 'User not found' });
+    }
+  });
+
+
+
+
+  
+});
 
 /*
   //클라이언트에서 새로운 회원가입이 오면 
