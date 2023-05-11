@@ -85,6 +85,7 @@
               success: function(response) {
                 console.log('서버 응답:', response);
                 // 로그인 성공 후 원하는 동작 수행
+                window.location.href="/dashboard"
               },
               error: function(error) {
                 console.error('서버 요청 실패:', error);

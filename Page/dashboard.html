@@ -1,0 +1,62 @@
+<!-- 대시보드 페이지 -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>대시보드</title>
+</head>
+<body>
+  <h1>대시보드</h1>
+  <h2>안녕하세요, <span id="name"></span>님</h2>
+  <script src="http://code.jquery.com/jquery-latest.js"></script>
+  <!-- 이미지 등록 폼 -->
+  <form id="imageUploadForm" enctype="multipart/form-data">
+    <input type="file" name="image" accept="image/*" required>
+    <button type="submit">이미지 등록</button>
+  </form>
+
+  <script>
+    // 로그인한 사용자의 이름 표시
+                $.ajax({
+            url: '/getUsername',
+            method: 'GET',
+            dataType:"json",
+            success: function(response) {
+                // user 데이터를 받아와서 처리
+                $('#name').text(response.username);
+            },
+            error: function(err) {
+                console.error(err);
+                // 오류 처리
+            }
+            });
+
+
+
+
+    // 이미지 등록 폼 제출 이벤트 처리
+    const imageUploadForm = document.getElementById('imageUploadForm');
+    imageUploadForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      
+      // FormData 객체 생성
+      const formData = new FormData(imageUploadForm);
+
+      // 이미지 등록 Ajax 요청
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/upload-image'); // 서버의 이미지 업로드 엔드포인트 URL 설정
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+          if (xhr.status === 200) {
+            // 이미지 등록 성공 처리
+            console.log('이미지 등록 성공');
+          } else {
+            // 이미지 등록 실패 처리
+            console.error('이미지 등록 실패');
+          }
+        }
+      };
+      xhr.send(formData);
+    });
+  </script>
+</body>
+</html>
