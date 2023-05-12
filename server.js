@@ -15,6 +15,7 @@ app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'ejs');
 const session = require('express-session');
 
+
 app.use(
   session({
     secret: 'your-secret-key', // 세션 암호화를 위한 비밀 키
@@ -119,25 +120,31 @@ app.post('/login', (req, res) => {
 
   
 });
+app.post('/upload', upload.single('image'), (req, res) => {
+  const username = req.session.username; // 로그인된 사용자의 이름
+  const file = req.file; // 수신된 이미지 파일
 
-/*
-  //클라이언트에서 새로운 회원가입이 오면 
-const url = 'http://192.168.35.135:5000/add_member';
-const data = {
-  key1: '이름',
-  key2: '사진'
-};
+  // 사용자 폴더 경로 생성
+  const userFolderPath = path.join(__dirname, 'Data', username);
+  if (!fs.existsSync(userFolderPath)) {
+    fs.mkdirSync(userFolderPath);
+  }
 
-//http://192.168.35.135/add_member
-axios.post(url, data)
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.error(error);
-  });
+  // 이미지 저장 경로 설정
+  const imageFolderPath = path.join(userFolderPath, 'images');
+  if (!fs.existsSync(imageFolderPath)) {
+    fs.mkdirSync(imageFolderPath);
+  }
+  const imagePath = path.join(imageFolderPath, file.originalname);
+  console.log(file.path, imagePath)
+  // 이미지 파일 이동 및 저장
+  fs.renameSync(file.path, imagePath);
 
-*/
+  res.send('이미지 전송 및 저장 완료');
+});
+
+
+
 app.use(express.static('public'));
 app.listen(3000, () => {
     console.log('Server is listening on port 3000!');

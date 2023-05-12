@@ -10,8 +10,9 @@
   <script src="http://code.jquery.com/jquery-latest.js"></script>
   <!-- 이미지 등록 폼 -->
   <form id="imageUploadForm" enctype="multipart/form-data">
-    <input type="file" name="image" accept="image/*" required>
-    <button type="submit">이미지 등록</button>
+    <input type="file" name="imageInput" accept="image/*" required>
+    
+    <button onclick="uploadImages()">이미지 등록</button>
   </form>
 
   <script>
@@ -29,34 +30,47 @@
                 // 오류 처리
             }
             });
+            $.ajax({
+              url: '/checkImageStatus',
+              type: 'GET',
+              success: function(response) {
+                if (response.isImageUploaded) {
+                  disableImageUploadButton(); // 이미지 등록 버튼 비활성화
+                }
+              },
+              error: function() {
+                console.error('이미지 등록 상태 확인 실패');
+              }
+            });
+
+            function uploadImages(){
+              const fileInput = $('#imageInput')[0];
+              const image = fileInput.files[0];
+
+              const formData = new FormData();
+              formData.append('image', image);
+              
+              $.ajax({
+                        url: '/upload',
+                        type: 'POST',
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function(response) {
+                          console.log('이미지 전송 및 저장 완료');
+                        },
+                        error: function() {
+                          console.error('이미지 전송 실패');
+                        }
+                });
+
+            }
+        
 
 
 
-
-    // 이미지 등록 폼 제출 이벤트 처리
-    const imageUploadForm = document.getElementById('imageUploadForm');
-    imageUploadForm.addEventListener('submit', (event) => {
-      event.preventDefault();
-      
-      // FormData 객체 생성
-      const formData = new FormData(imageUploadForm);
-
-      // 이미지 등록 Ajax 요청
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', '/upload-image'); // 서버의 이미지 업로드 엔드포인트 URL 설정
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-          if (xhr.status === 200) {
-            // 이미지 등록 성공 처리
-            console.log('이미지 등록 성공');
-          } else {
-            // 이미지 등록 실패 처리
-            console.error('이미지 등록 실패');
-          }
-        }
-      };
-      xhr.send(formData);
-    });
+    
+    
   </script>
 </body>
 </html>
