@@ -139,12 +139,19 @@ app.post('/upload', upload.single('image'), (req, res) => {
   console.log(file.path, imagePath)
   // 이미지 파일 이동 및 저장
   fs.renameSync(file.path, imagePath);
-
+  // 이미지 저장이 완료되면 디비에 이미지에 대한 path를 저장해야함. 이 부분 연구하기. 디비에 어떻게 이미지를 저장할까?
   res.send('이미지 전송 및 저장 완료');
 });
 
+app.post('/checkFace', (req,res)=>{
+  //이미지 저장이 되어 있으면 이미지 버튼 비활성화하기 
 
 
+})
+
+function checkFace(){
+  
+}
 app.use(express.static('public'));
 app.listen(3000, () => {
     console.log('Server is listening on port 3000!');
