@@ -10,9 +10,8 @@
   <script src="http://code.jquery.com/jquery-latest.js"></script>
   <!-- 이미지 등록 폼 -->
   <form id="imageUploadForm" enctype="multipart/form-data">
-    <input type="file" name="imageInput" accept="image/*" required>
-    
-    <button onclick="uploadImages()">이미지 등록</button>
+    <input type="file" id="imageInput" name="image">
+    <button type="button" onclick="uploadImages()">전송</button>
   </form>
 
   <script>
@@ -30,18 +29,15 @@
                 // 오류 처리
             }
             });
-            //이미지 등록 버튼 비활성화 정도 
-            function checkFace(){
-            //서버측에다가 api 요청 /checkFace 으로 요청받아서 
-            //
-            }
-          
+            
+      
             function uploadImages(){
-              const fileInput = $('#imageInput')[0];
-              const image = fileInput.files[0];
+              console.log("업로드이미지 함수 동작하였음.")
+              var fileInput = document.getElementById('imageInput');
+              var file = fileInput.files[0];
 
-              const formData = new FormData();
-              formData.append('image', image);
+              var formData = new FormData();
+              formData.append('image', file);
               
               $.ajax({
                         url: '/upload',
@@ -50,10 +46,8 @@
                         contentType: false,
                         processData: false,
                         success: function(response) {
-                          console.log('이미지 전송 및 저장 완료');
-                          //이미지 전송 및 저장완료일 경우 서버측에서 path를 디비에 저장함.
-                          //로그인할 때 서버측에서 req.session.username 을 mysql로 검색해서 
-                          // db에서 ok일 경우 버튼활성화 아닐경우 버튼 비활성화
+                          console.log(response)
+                         
                         },
                         error: function() {
                           console.error('이미지 전송 실패');

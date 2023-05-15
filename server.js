@@ -2,18 +2,20 @@ const express = require('express');
 const multer = require('multer');
 const axios = require('axios');
 const app = express();
-const upload = multer();
 const path = require('path');
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const bodyParser = require('body-parser');
 const { Console } = require('console');
 const { userInfo } = require('os');
+const fs = require('fs');
 app.use(bodyParser.json()) // for parsing application/json
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'ejs');
 const session = require('express-session');
+
+
 app.use(
   session({
     secret: 'your-secret-key', // 세션 암호화를 위한 비밀 키
@@ -23,10 +25,34 @@ app.use(
   })
 );
 
+
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = 'Data/'+req.session.username+'/';
+    const destination = path.join(__dirname, uploadDir);
+
+    if (!fs.existsSync(destination)) {
+      fs.mkdirSync(destination, { recursive: true });
+    }
+    cb(null, uploadDir);
+
+
+  },
+  filename: function (req, file, cb) {
+    // 파일 이름을 현재 시간으로 설정하여 중복을 피함
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+
+
 const connection = mysql.createConnection({
-  host: 'ans3.cwmxwotwq2p1.us-east-1.rds.amazonaws.com',
-  user: 'admin',
-  password: 'ehrjsdn123!',
+  host: '127.0.0.1',
+  port: 3306,
+  user: 'root',
+  password: '1234',
   database: 'sys'
 });
 
@@ -67,13 +93,13 @@ app.post('/signup', (req, res) => {
   let userData = req.body;
   console.log(userData)
   // MySQL에 데이터 저장
-  connection.query('INSERT INTO signup (username, password, email, phone, name) VALUES (?, ?, ?, ?, ?)', [userData.username, userData.password, userData.email, userData.phone, userData.name], (error, results, fields) => {
+  connection.query('INSERT INTO signup (username, password, name, email, phone) VALUES (?, ?, ?, ?, ?)', [userData.username, userData.password, userData.name, userData.email, userData.phone], (error, results, fields) => {
     if (error) {
       console.error('MySQL 저장 실패:', error);
       res.status(500).json({ message: '회원가입에 실패했습니다.' });
     } else {
       console.log('MySQL 저장 성공');
-      res.redirect('/')
+      
       res.json({ message: '회원가입이 완료되었습니다.' });
       
     }
@@ -119,80 +145,29 @@ app.post('/login', (req, res) => {
 
   
 });
-app.post('/upload', upload.single('image'), (req, res) => {
-  const username = req.session.username; // 로그인된 사용자의 이름
-  const file = req.file; // 수신된 이미지 파일
 
-  // 사용자 폴더 경로 생성
-  const userFolderPath = path.join(__dirname, 'Data', username);
-  if (!fs.existsSync(userFolderPath)) {
-    fs.mkdirSync(userFolderPath);
-  }
-
-  // 이미지 저장 경로 설정
-  const imageFolderPath = path.join(userFolderPath, 'images');
-  if (!fs.existsSync(imageFolderPath)) {
-    fs.mkdirSync(imageFolderPath);
-  }
-  const imagePath = path.join(imageFolderPath, file.originalname);
-  console.log(file.path, imagePath)
-  // 이미지 파일 이동 및 저장
-  fs.renameSync(file.path, imagePath);
-  // 이미지 저장이 완료되면 디비에 이미지에 대한 path를 저장해야함. 이 부분 연구하기. 디비에 어떻게 이미지를 저장할까?
-  res.send('이미지 전송 및 저장 완료');
-});
-
-app.post('/checkFace', (req,res)=>{
-  //이미지 저장이 되어 있으면 이미지 버튼 비활성화하기 
-  const loggedInUser = req.session.username;
-  const isFaceRegistered = checkFace(loggedInUser);
-
-  // 응답으로 얼굴 등록 여부 전송
-  res.json({ isRegistered: isFaceRegistered });
-
-  
-})
-
-function checkFace(loggedInUser){
-  //데이터 베이스 조회
-  const username = req.session.username;
-  const isRegistered = false;
-  const query = `SELECT Is FROM signup WHERE username = '${username}'`;
-  connection.query(query, (err, results) => {
-    if (err) {
-      console.error('MySQL query error: ', err);
-      res.status(500).json({ message: 'Internal Server Error' });
-      return;
+const upload = multer({ storage: storage }).single('image');
+app.post('/upload', (req, res) => {
+  upload(req, res, function (err) {
+    if (err instanceof multer.MulterError) {
+      // 업로드 중에 에러가 발생한 경우
+      console.log('Multer Error:', err);
+      return res.status(500).json({ error: err.message });
+    } else if (err) {
+      // 기타 에러가 발생한 경우
+      console.log('Other Error:', err);
+      return res.status(500).json({ error: 'An error occurred during upload.' });
     }
-    
-    // 사용자 정보가 존재하는 경우
-    if (results.length > 0) {
-      
-    }
+
+    // 이미지가 정상적으로 전송되었을 때
+    const imagePath = req.file.path; // 저장된 이미지의 경로
+    console.log('Image Path:', imagePath);
+
+    // 추가적인 작업 수행 가능
+
+    return res.status(200).json({ success: true });
   });
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+});
 
 
 
