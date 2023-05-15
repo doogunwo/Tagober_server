@@ -73,6 +73,7 @@ app.post('/signup', (req, res) => {
       res.status(500).json({ message: '회원가입에 실패했습니다.' });
     } else {
       console.log('MySQL 저장 성공');
+      res.redirect('/')
       res.json({ message: '회원가입이 완료되었습니다.' });
       
     }
