@@ -14,8 +14,6 @@ app.use(cookieParser());
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'ejs');
 const session = require('express-session');
-
-
 app.use(
   session({
     secret: 'your-secret-key', // 세션 암호화를 위한 비밀 키
@@ -145,13 +143,58 @@ app.post('/upload', upload.single('image'), (req, res) => {
 
 app.post('/checkFace', (req,res)=>{
   //이미지 저장이 되어 있으면 이미지 버튼 비활성화하기 
+  const loggedInUser = req.session.username;
+  const isFaceRegistered = checkFace(loggedInUser);
 
+  // 응답으로 얼굴 등록 여부 전송
+  res.json({ isRegistered: isFaceRegistered });
 
+  
 })
 
-function checkFace(){
-  
+function checkFace(loggedInUser){
+  //데이터 베이스 조회
+  const username = req.session.username;
+  const isRegistered = false;
+  const query = `SELECT Is FROM signup WHERE username = '${username}'`;
+  connection.query(query, (err, results) => {
+    if (err) {
+      console.error('MySQL query error: ', err);
+      res.status(500).json({ message: 'Internal Server Error' });
+      return;
+    }
+    
+    // 사용자 정보가 존재하는 경우
+    if (results.length > 0) {
+      
+    }
+  });
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 app.use(express.static('public'));
 app.listen(3000, () => {
     console.log('Server is listening on port 3000!');

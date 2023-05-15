@@ -30,6 +30,11 @@
                 // 오류 처리
             }
             });
+            //이미지 등록 버튼 비활성화 정도 
+            function checkFace(){
+            //서버측에다가 api 요청 /checkFace 으로 요청받아서 
+            //
+            }
             $.ajax({
               url: '/checkImageStatus',
               type: 'GET',
@@ -58,6 +63,9 @@
                         processData: false,
                         success: function(response) {
                           console.log('이미지 전송 및 저장 완료');
+                          //이미지 전송 및 저장완료일 경우 서버측에서 path를 디비에 저장함.
+                          //로그인할 때 서버측에서 req.session.username 을 mysql로 검색해서 
+                          // db에서 ok일 경우 버튼활성화 아닐경우 버튼 비활성화
                         },
                         error: function() {
                           console.error('이미지 전송 실패');
