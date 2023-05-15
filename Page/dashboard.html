@@ -35,19 +35,7 @@
             //서버측에다가 api 요청 /checkFace 으로 요청받아서 
             //
             }
-            $.ajax({
-              url: '/checkImageStatus',
-              type: 'GET',
-              success: function(response) {
-                if (response.isImageUploaded) {
-                  disableImageUploadButton(); // 이미지 등록 버튼 비활성화
-                }
-              },
-              error: function() {
-                console.error('이미지 등록 상태 확인 실패');
-              }
-            });
-
+          
             function uploadImages(){
               const fileInput = $('#imageInput')[0];
               const image = fileInput.files[0];
