@@ -109,8 +109,6 @@ app.post('/login', (req, res) => {
   const { username, password } = req.body;
   req.session.username = username;
   // MySQL 데이터베이스에서 사용자 정보 검증
-  // 이 예시에서는 간단한 비교를 통해 로그인 검증을 수행합니다.
-  // 실제로는 bcrypt나 passport 등을 사용하여 안전한 방식으로 비밀번호를 검증해야 합니다.
   const query = `SELECT * FROM signup WHERE username = '${username}'`;
   connection.query(query, (err, results) => {
     if (err) {
@@ -133,7 +131,7 @@ app.post('/login', (req, res) => {
        
       } else {
         res.status(401).json({ message: 'Invalid password' });
-      }
+      } 
     } else {
       // 사용자 정보가 존재하지 않는 경우
       res.status(404).json({ message: 'User not found' });
@@ -159,11 +157,26 @@ app.post('/upload', (req, res) => {
       return res.status(500).json({ error: 'An error occurred during upload.' });
     }
 
+
     // 이미지가 정상적으로 전송되었을 때
     const imagePath = req.file.path; // 저장된 이미지의 경로
     console.log('Image Path:', imagePath);
-
+    const root_path = 'D:\ans_server\Tagober_server';
     // 추가적인 작업 수행 가능
+    
+
+    //`SELECT * FROM signup WHERE username = '${username}'`
+    const query = `update sys.faceregister set imagePath = '${root_path+'/'+imagePath}' where username = '${req.session.username}'`;
+    console.log(query);
+    connection.query(query, (error, results) => {
+      if (error) {
+        console.error('Error inserting image path:', error);
+        // 에러 처리
+      } else {
+        console.log('Image path inserted successfully');
+        // 성공적으로 삽입된 경우의 처리
+      }
+    });
 
     return res.status(200).json({ success: true });
   });
