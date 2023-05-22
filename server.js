@@ -87,7 +87,6 @@ app.get('/getUsername', (req, res) => {
   res.json({ username }); // 회원 이름을 JSON 형식으로 응답
 });
 
-
 app.post('/signup', (req, res) => {
   // 클라이언트로부터 전송된 데이터 수신
   let userData = req.body;
