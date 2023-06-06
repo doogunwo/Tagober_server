@@ -38,7 +38,10 @@
 
               var formData = new FormData();
               formData.append('image', file);
-              
+              requestData = {
+                  result : 'update'
+                }
+                
               $.ajax({
                         url: '/upload',
                         type: 'POST',
@@ -53,6 +56,22 @@
                           console.error('이미지 전송 실패');
                         }
                 });
+                
+
+              $.ajax({
+                        url: '/update',
+                        type: 'POST',
+                        data : requestData,
+                        contentType: false,
+                        success:function(response){
+                          console.log('POST 요청 성공:', response);
+                        },
+                        error:function(error){
+                          console.log('POST 요청 실패:', error);
+                        }
+
+                });
+              
 
             }
         

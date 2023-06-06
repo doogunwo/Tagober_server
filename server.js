@@ -31,7 +31,7 @@ const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadDir = 'Data/'+req.session.username+'/';
     const destination = path.join(__dirname, uploadDir);
-
+   
     if (!fs.existsSync(destination)) {
       fs.mkdirSync(destination, { recursive: true });
     }
@@ -41,8 +41,8 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     // 파일 이름을 현재 시간으로 설정하여 중복을 피함
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
+    
+    cb(null, req.session.username+".jpg");
   }
 });
 
@@ -76,17 +76,16 @@ app.get('/login', (req, res) => {
 app.get('/signup', (req, res) => {
   res.sendFile(path.join(__dirname, 'Page', 'signup.html'));
 });
-
 app.get('/dashboard', (req, res) => {
-   // 쿠키 설정
     res.sendFile(path.join(__dirname, 'Page', 'dashboard.html'));
 });
+
+
 
 app.get('/getUsername', (req, res) => {
   const username = req.session.username; // 세션에서 회원 이름 가져오기
   res.json({ username }); // 회원 이름을 JSON 형식으로 응답
 });
-
 app.post('/signup', (req, res) => {
   // 클라이언트로부터 전송된 데이터 수신
   let userData = req.body;
@@ -142,7 +141,6 @@ app.post('/login', (req, res) => {
 
   
 });
-
 const upload = multer({ storage: storage }).single('image');
 app.post('/upload', (req, res) => {
   upload(req, res, function (err) {
@@ -158,9 +156,9 @@ app.post('/upload', (req, res) => {
 
 
     // 이미지가 정상적으로 전송되었을 때
-    const imagePath = req.file.path; // 저장된 이미지의 경로
+    const imagePath = 'Data/'+req.session.username+'/'+req.session.username+'.jpg'
     console.log('Image Path:', imagePath);
-    const root_path = 'D:\ans_server\Tagober_server';
+    const root_path = 'D:/ans_server/Tagober_server';
     // 추가적인 작업 수행 가능
     
 
@@ -174,6 +172,8 @@ app.post('/upload', (req, res) => {
       } else {
         console.log('Image path inserted successfully');
         // 성공적으로 삽입된 경우의 처리
+        // flask에 update 요청넣기
+        
       }
     });
 
@@ -181,7 +181,25 @@ app.post('/upload', (req, res) => {
   });
 });
 
+app.post('/update',(req,res)=>{
+    //파이썬에 파일 업데이트 오더
+    requestData = {
+      result : 'update'
+    }
 
+    console.log(requestData)
+    axios.post('http://14.42.240.116:82/update',requestData)
+      .then(response=>{
+        console.log(response)
+
+      })
+      .catch(error => {
+        
+        console.error("update error"+error);
+      });
+
+    
+})
 
 app.use(express.static('public'));
 app.listen(3000, () => {
