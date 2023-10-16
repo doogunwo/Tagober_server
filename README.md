@@ -1,5 +1,5 @@
 # Tagober_server
-타고버의 백엔드 시스템 코드입니다.
+동의대학교 컴퓨터공학과 도건우 졸업작품인 '타고버'의 Nodejs 서버프로그램 입니다.
 
 
 ![image](https://github.com/doogunwo/Tagober_server/assets/87505243/39e99b47-8f77-48b9-85e7-66c1d625e12a)
