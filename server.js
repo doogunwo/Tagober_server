@@ -27,15 +27,13 @@ app.use(
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadDir = 'Data/'+req.session.username+'/';
+    const uploadDir = 'Page/Data/'+req.session.username+'/';
     const destination = path.join(__dirname, uploadDir);
    
     if (!fs.existsSync(destination)) {
       fs.mkdirSync(destination, { recursive: true });
     }
     cb(null, uploadDir);
-
-
   },
   filename: function (req, file, cb) {
     // 파일 이름을 현재 시간으로 설정하여 중복을 피함
@@ -129,7 +127,7 @@ app.get("/profile",(req,res)=>{
         `;
         res.send(html);
       }
-
+//<input type="file" id="imageInput" name="image">
       else{
         html = 
         `
@@ -137,7 +135,7 @@ app.get("/profile",(req,res)=>{
         <h5>${email}<h5>
         <h5>${phone}<h5>
         <div class="mb-3">
-              <input class="form-control" type="file" id="formFile">
+              <input class="form-control" type="file" id="imageInput">
             </div>
             <button type="button" class="btn btn-primary" onclick="uploadImages()">얼굴 등록</button>
         <div>
@@ -260,10 +258,10 @@ app.post('/upload', (req, res) => {
 
 
     // 이미지가 정상적으로 전송되었을 때app.use('/views', express.static(path.join(__dirname,'views')))
-    const imagePath = 'Data/'+req.session.username+'/'+req.session.username+'.jpg'
+    const imagePath = '/Data/'+req.session.username+'/'+req.session.username+'.jpg'
     const root_path = 'D:/ans_server/Tagober_server';
     // 추가적인 작업 수행 가능
-    
+    const server_path = 'Page/Data/'+req.session.username+'/'+req.session.username+'.jpg'
 
     //`SELECT * FROM signup WHERE username = '${username}'`
     const query = `update sys.faceregister set imagePath = '${root_path+'/'+imagePath}' where username = '${req.session.username}'`;
@@ -275,10 +273,8 @@ app.post('/upload', (req, res) => {
         console.log('Image path inserted successfully');
         // 성공적으로 삽입된 경우의 처리
         // flask에 update 요청넣기
-        
       }
     });
-
     return res.status(200).json({ success: true });
   });
 });
@@ -292,7 +288,6 @@ app.post('/update',(req,res)=>{
     axios.post('http://14.49.83.210:82/update',requestData)
       .then(response=>{
         console.log(response)
-
       })
       .catch(error => {
         
@@ -302,7 +297,6 @@ app.post('/update',(req,res)=>{
     
 })
 
-app.use(express.static('public'));
 app.listen(3000, () => {
     console.log('Server is listening on port 3000!');
   });
