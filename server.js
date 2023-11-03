@@ -100,33 +100,9 @@ app.get('/signup', (req, res) => {
   res.sendFile(path.join(__dirname, 'Page', 'signup.html'));
 });
 app.get('/dashboard', (req, res) => {
-
-  const query = `SELECT * FROM payment WHERE name = '${req.session.username}'`
-  
-  var productHTML = '<table><tr><th>아이디</th><th>요금</th><th>탑승시간</th></tr>';
-  var userinfo = '';
-  connection.query(query, (err, results) => {
-    if (err) {
-      console.error('MySQL query error: ', err);
-      res.status(500).json({ message: 'Internal Server Error' });
-      return;
-    }
-
-    for(const row of results){
-      const payment_name = row.name;
-      const payment_fee = row.fee;
-      const payment_time = row.time;
-      const time = timeconverter(payment_time);
-      const itemHTML = `<tr><td>${payment_name}</td><td>${payment_fee}</td><td>${time}</td></tr>`;
-      productHTML += itemHTML
-    }
-    //res.sendFile(path.join(__dirname, 'Page', 'dashboard.html'));
-    var resultHTML = fs.readFileSync("Page/dashboard.html",'utf-8')
-    resultHTML = resultHTML.replace(`<div id="here"></div>`,productHTML)
-    res.status(200).send(resultHTML)
-
-  });
+  res.sendFile(path.join(__dirname, 'Page', 'dashboard.html'));
 });
+
 
 app.get("/profile",(req,res)=>{
   const query = `SELECT * FROM signup WHERE username = '${req.session.username}'`;
@@ -172,15 +148,39 @@ app.get("/profile",(req,res)=>{
   })
 })
 
+app.get("/record",(req,res)=>{
+  const query = `SELECT * FROM payment WHERE name = '${req.session.username}'`
+  
+  var productHTML = '<table><tr><th>아이디</th><th>요금</th><th>탑승시간</th></tr>';
+  var userinfo = '';
+  connection.query(query, (err, results) => {
+    if (err) {
+      console.error('MySQL query error: ', err);
+      res.status(500).json({ message: 'Internal Server Error' });
+      return;
+    }
+
+    for(const row of results){
+      const payment_name = row.name;
+      const payment_fee = row.fee;
+      const payment_time = row.time;
+      const time = timeconverter(payment_time);
+      const itemHTML = `<tr><td>${payment_name}</td><td>${payment_fee}</td><td>${time}</td></tr>`;
+      productHTML += itemHTML
+    }
+    //res.sendFile(path.join(__dirname, 'Page', 'dashboard.html'));
+    res.send(productHTML);
+  });
+})
+
 app.get("/face",(req,res)=>{
   const sep = separete(req.session.username,(err,result)=>{
     const filePath = result
     // 파일 이름 추출
     const fileName = filePath.split('/').pop(); // 'dgw0601.jpg'가 저장됩니다.
     const file = fileName.split('.').slice(0, -1).join('.'); // 'dgw0601'가 저장됩니다.
-    const path = "./Data/"+file+"/"+file+".jpg"
+    const path = "http://localhost:3000/Page/Data/"+file+"/"+file+".jpg"
     html = `<img src=${path} width="120" height="120">`
-    console.log(html)
     res.send(html);
     //<img src=${result} width="120" height="120">
   })
@@ -203,10 +203,11 @@ app.post('/signup', (req, res) => {
       console.log('MySQL 저장 성공');
       
       res.json({ message: '회원가입이 완료되었습니다.' });
-      
     }
   });
 });
+
+
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
   req.session.username = username;

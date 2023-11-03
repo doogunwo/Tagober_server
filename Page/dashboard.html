@@ -129,14 +129,19 @@
           });
 
           $('#showface').click(function(){
-            console.log("cilck")
             $('#myModal').show();
             $.get('/face', function(data) {
               // 이미지 주소를 모달 내의 이미지 요소에 설정
               $('#profile_content').html(data);
             });
           })
-        
+          
+          $('#records').click(function(){
+            $.get('/record', function(data) {
+              // 이미지 주소를 모달 내의 이미지 요소에 설정
+              $('#profile_content').html(data);
+            });
+          })
   </script>
 </body>
 
