@@ -4,11 +4,10 @@
 <head>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
-
-  <title>TaGoBer</title>
 </head>
 
 <style>
+   /* 모달 스타일 */
   .container {
     display: flex;
     justify-content: center;
@@ -39,11 +38,20 @@
     </div>
 
     <div class="container_intro">
-      <h1>TaGoBer</h1>
       <h5><span id="name"></span></h5>
       <div class="buttons">
-        <button class="btn btn-primary" id="profile">프로필 보기</button>
+        <button id="showface" type="button" class="btn btn-primary" >얼굴</button>
+        <button class="btn btn-primary" id="profile" >프로필 보기</button>
         <button class="btn btn-primary" id="records">탑승 기록</button>
+        <hr>
+      </div>
+
+      <div id="myModal" style="display: none;">
+        <div id="profile_content"></div>
+        
+          <hr>
+          <button id="modalclose" class="btn btn-primary">닫기</button>
+        </div>
       </div>
     </div>
 
@@ -66,6 +74,7 @@
             });
             
           function uploadImages(){
+
               console.log("업로드이미지 함수 동작하였음.")
               var fileInput = document.getElementById('imageInput');
               var file = fileInput.files[0];
@@ -107,8 +116,27 @@
               
 
             }
-            
+          
+          $('#profile').click(function () {
+            $('#myModal').show();
+              $.get('/profile', function (data) {
+                $('#profile_content').html(data);
+              });
+          });
 
+          $('#modalclose').click(function () {
+            $('#myModal').hide();
+          });
+
+          $('#showface').click(function(){
+            console.log("cilck")
+            $('#myModal').show();
+            $.get('/face', function(data) {
+              // 이미지 주소를 모달 내의 이미지 요소에 설정
+              $('#profile_content').html(data);
+            });
+          })
+        
   </script>
 </body>
 

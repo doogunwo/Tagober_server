@@ -6,11 +6,12 @@ const path = require('path');
 const mysql = require('mysql2');
 const bodyParser = require('body-parser');
 const fs = require('fs');
-app.use(bodyParser.json()) // for parsing application/json
 const cookieParser = require('cookie-parser');
+
 app.use('/Page', express.static(path.join(__dirname,'Page')))
 app.use(cookieParser());
 app.engine('html', require('ejs').renderFile);
+app.use(bodyParser.json()) // for parsing application/json
 app.set('view engine', 'ejs');
 const session = require('express-session');
 app.use(
@@ -42,7 +43,7 @@ const storage = multer.diskStorage({
     cb(null, req.session.username+".jpg");
   }
 });
-
+const upload = multer({ storage: storage }).single('image');
 
 
 const connection = mysql.createConnection({
@@ -72,6 +73,21 @@ function timeconverter(unixTimestamp){
   return year+"년:"+month+"월:"+day+"일:"+hours+"시:"+minutes+"분";
 }
 
+function separete(user,callback){
+  const query = `SELECT imagePath FROM faceregister WHERE username = '${user}'`;
+  connection.query(query,(err,result)=>{
+    if(err){
+      console.log("err separeate")
+      return "err";
+    }
+    if(result.length > 0 && result[0].imagePath){
+      return callback(null,result[0].imagePath);
+    }
+    else{
+      return callback(null,0);
+    }
+  })
+}
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'Page', 'Main.html'));
@@ -88,6 +104,7 @@ app.get('/dashboard', (req, res) => {
   const query = `SELECT * FROM payment WHERE name = '${req.session.username}'`
   
   var productHTML = '<table><tr><th>아이디</th><th>요금</th><th>탑승시간</th></tr>';
+  var userinfo = '';
   connection.query(query, (err, results) => {
     if (err) {
       console.error('MySQL query error: ', err);
@@ -111,10 +128,69 @@ app.get('/dashboard', (req, res) => {
   });
 });
 
+app.get("/profile",(req,res)=>{
+  const query = `SELECT * FROM signup WHERE username = '${req.session.username}'`;
+  var html = ''
+  connection.query(query, (err, results)=>{
+    if (err) {
+      console.error('MySQL query error: ', err);
+      res.status(500).json({ message: 'Internal Server Error' });
+      return;
+    }
+    const username = results[0].username;
+    const name = results[0].name;
+    const email = results[0].email;
+    const phone = results[0].phone;
+
+    
+    const sep = separete(req.session.username,(err,result)=>{
+      if(result != 0 ){//등록되어있음
+        html = 
+        `
+        <h5>${name}<h5>
+        <h5>${email}<h5>
+        <h5>${phone}<h5>
+        `;
+        res.send(html);
+      }
+
+      else{
+        html = 
+        `
+        <h5>${name}<h5>
+        <h5>${email}<h5>
+        <h5>${phone}<h5>
+        <div class="mb-3">
+              <input class="form-control" type="file" id="formFile">
+            </div>
+            <button type="button" class="btn btn-primary" onclick="uploadImages()">얼굴 등록</button>
+        <div>
+        `;
+        res.send(html);
+      }
+    });
+  })
+})
+
+app.get("/face",(req,res)=>{
+  const sep = separete(req.session.username,(err,result)=>{
+    const filePath = result
+    // 파일 이름 추출
+    const fileName = filePath.split('/').pop(); // 'dgw0601.jpg'가 저장됩니다.
+    const file = fileName.split('.').slice(0, -1).join('.'); // 'dgw0601'가 저장됩니다.
+    const path = "./Data/"+file+"/"+file+".jpg"
+    html = `<img src=${path} width="120" height="120">`
+    console.log(html)
+    res.send(html);
+    //<img src=${result} width="120" height="120">
+  })
+})
+
 app.get('/getUsername', (req, res) => {
   const username = req.session.username; // 세션에서 회원 이름 가져오기
   res.json({ username }); // 회원 이름을 JSON 형식으로 응답
 });
+
 app.post('/signup', (req, res) => {
   // 클라이언트로부터 전송된 데이터 수신
   let userData = req.body;
@@ -163,7 +239,6 @@ app.post('/login', (req, res) => {
   });
 
 });
-const upload = multer({ storage: storage }).single('image');
 app.post('/upload', (req, res) => {
   upload(req, res, function (err) {
     if (err instanceof multer.MulterError) {
