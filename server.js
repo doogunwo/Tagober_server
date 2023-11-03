@@ -5,17 +5,14 @@ const app = express();
 const path = require('path');
 const mysql = require('mysql2');
 const bodyParser = require('body-parser');
-const { Console } = require('console');
-const { userInfo } = require('os');
 const fs = require('fs');
 app.use(bodyParser.json()) // for parsing application/json
 const cookieParser = require('cookie-parser');
+app.use('/Page', express.static(path.join(__dirname,'Page')))
 app.use(cookieParser());
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'ejs');
 const session = require('express-session');
-
-
 app.use(
   session({
     secret: 'your-secret-key', // 세션 암호화를 위한 비밀 키
@@ -64,6 +61,16 @@ connection.connect((err) => {
   console.log('Connected to MySQL database');
 });
 
+function timeconverter(unixTimestamp){
+  const date = new Date(unixTimestamp * 1000);
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1; // getMonth()는 0부터 시작하므로 1을 더해줍니다.
+  const day = date.getDate();
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+
+  return year+"년:"+month+"월:"+day+"일:"+hours+"시:"+minutes+"분";
+}
 
 
 app.get('/', (req, res) => {
@@ -77,10 +84,32 @@ app.get('/signup', (req, res) => {
   res.sendFile(path.join(__dirname, 'Page', 'signup.html'));
 });
 app.get('/dashboard', (req, res) => {
-    res.sendFile(path.join(__dirname, 'Page', 'dashboard.html'));
+
+  const query = `SELECT * FROM payment WHERE name = '${req.session.username}'`
+  
+  var productHTML = '<table><tr><th>아이디</th><th>요금</th><th>탑승시간</th></tr>';
+  connection.query(query, (err, results) => {
+    if (err) {
+      console.error('MySQL query error: ', err);
+      res.status(500).json({ message: 'Internal Server Error' });
+      return;
+    }
+
+    for(const row of results){
+      const payment_name = row.name;
+      const payment_fee = row.fee;
+      const payment_time = row.time;
+      const time = timeconverter(payment_time);
+      const itemHTML = `<tr><td>${payment_name}</td><td>${payment_fee}</td><td>${time}</td></tr>`;
+      productHTML += itemHTML
+    }
+    //res.sendFile(path.join(__dirname, 'Page', 'dashboard.html'));
+    var resultHTML = fs.readFileSync("Page/dashboard.html",'utf-8')
+    resultHTML = resultHTML.replace(`<div id="here"></div>`,productHTML)
+    res.status(200).send(resultHTML)
+
+  });
 });
-
-
 
 app.get('/getUsername', (req, res) => {
   const username = req.session.username; // 세션에서 회원 이름 가져오기
@@ -89,7 +118,6 @@ app.get('/getUsername', (req, res) => {
 app.post('/signup', (req, res) => {
   // 클라이언트로부터 전송된 데이터 수신
   let userData = req.body;
-  console.log(userData)
   // MySQL에 데이터 저장
   connection.query('INSERT INTO signup (username, password, name, email, phone) VALUES (?, ?, ?, ?, ?)', [userData.username, userData.password, userData.name, userData.email, userData.phone], (error, results, fields) => {
     if (error) {
@@ -118,12 +146,10 @@ app.post('/login', (req, res) => {
     // 사용자 정보가 존재하는 경우
     if (results.length > 0) {
       const user = results[0];
-      console.log(user)
       
       
       // 비밀번호가 일치하는 경우
       if (user.password === password) {
-        console.log("username",user.name);
         
         res.sendStatus(200);
        
@@ -136,10 +162,6 @@ app.post('/login', (req, res) => {
     }
   });
 
-
-
-
-  
 });
 const upload = multer({ storage: storage }).single('image');
 app.post('/upload', (req, res) => {
@@ -155,16 +177,14 @@ app.post('/upload', (req, res) => {
     }
 
 
-    // 이미지가 정상적으로 전송되었을 때
+    // 이미지가 정상적으로 전송되었을 때app.use('/views', express.static(path.join(__dirname,'views')))
     const imagePath = 'Data/'+req.session.username+'/'+req.session.username+'.jpg'
-    console.log('Image Path:', imagePath);
     const root_path = 'D:/ans_server/Tagober_server';
     // 추가적인 작업 수행 가능
     
 
     //`SELECT * FROM signup WHERE username = '${username}'`
     const query = `update sys.faceregister set imagePath = '${root_path+'/'+imagePath}' where username = '${req.session.username}'`;
-    console.log(query);
     connection.query(query, (error, results) => {
       if (error) {
         console.error('Error inserting image path:', error);
@@ -187,8 +207,7 @@ app.post('/update',(req,res)=>{
       result : 'update'
     }
 
-    console.log(requestData)
-    axios.post('http://14.42.240.116:82/update',requestData)
+    axios.post('http://14.49.83.210:82/update',requestData)
       .then(response=>{
         console.log(response)
 
