@@ -175,14 +175,21 @@ app.get("/record",(req,res)=>{
 
 app.get("/face",(req,res)=>{
   const sep = separete(req.session.username,(err,result)=>{
+    if(err){
+        return;
+    }
     const filePath = result
-    // 파일 이름 추출
-    const fileName = filePath.split('/').pop(); // 'dgw0601.jpg'가 저장됩니다.
-    const file = fileName.split('.').slice(0, -1).join('.'); // 'dgw0601'가 저장됩니다.
-    const path = "http://localhost:3000/Page/Data/"+file+"/"+file+".jpg"
-    html = `<img src=${path} width="120" height="120">`
-    res.send(html);
-    //<img src=${result} width="120" height="120">
+    if(filePath==0){
+      html = `<h5>얼굴 등록이 되지 않았습니다.<h5>`
+      res.send(html);
+    }
+    else{
+      const fileName = filePath.split('/').pop(); // 'dgw0601.jpg'가 저장됩니다.
+      const file = fileName.split('.').slice(0, -1).join('.'); // 'dgw0601'가 저장됩니다.
+      const path = "http://localhost:3000/Page/Data/"+file+"/"+file+".jpg"
+      html = `<img src=${path} width="120" height="120">`
+      res.send(html);
+    }
   })
 })
 
@@ -201,7 +208,6 @@ app.post('/signup', (req, res) => {
       res.status(500).json({ message: '회원가입에 실패했습니다.' });
     } else {
       console.log('MySQL 저장 성공');
-      
       res.json({ message: '회원가입이 완료되었습니다.' });
     }
   });

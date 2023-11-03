@@ -28,9 +28,20 @@
     }
   
     .container_image {
-     
       height: 400px;
     }
+    .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            width: 300px; /* 모달의 너비 조절 */
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
   </style>
 </head>
 
@@ -43,29 +54,16 @@
     <div class="container_intro">
       <h1>TaGoBer </h1>
       <hr>
-      <div class="input-group input-group-sm mb-3">
-        <span class="input-group-text" id="username">ID</span>
-        <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
-      </div>
+      <input class="form-control" id="username" type="text" placeholder="ID">
+      <input class="form-control" id="password"type="text" placeholder="password">
+      <input class="form-control" id="email"type="text" placeholder="email">
+      <input class="form-control" id="phone"type="text" placeholder="phone">
+      <input class="form-control" id="name"type="text" placeholder="name">
+      <hr>
       
-      <div class="input-group input-group-sm mb-3">
-        <span class="input-group-text" id="password">password</span>
-        <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
-      </div>
-
-      <div class="input-group input-group-sm mb-3">
-        <span class="input-group-text" id="email">Email</span>
-        <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
-      </div>
-      
-      <div class="input-group input-group-sm mb-3">
-        <span class="input-group-text" id="phone">Phone</span>
-        <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
-      </div>
-
-      <div class="input-group input-group-sm mb-3">
-        <span class="input-group-text" id="name">Name</span>
-        <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+      <div class="modal" id="modal">
+        <div id="profile_content"></div>
+        <button id="closeModal">모달 닫기</button>
       </div>
 
       <div class="buttons">
@@ -74,14 +72,15 @@
       </div>
     </div>
     </form>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
       function signup() {
         // 입력된 정보 가져오기
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        const email = document.getElementById('email').value;
-        const phone = document.getElementById('phone').value;
-        const name = document.getElementById('name').value;
+        const username = $('#username').val();
+        const password = $('#password').val();
+        const email = $('#email').val();
+        const phone = $('#phone').val();
+        const name = $('#name').val()
         let userData = {
           username: username,
           password: password,
@@ -89,7 +88,6 @@
           phone: phone,
           name: name
         };
-
         // 서버로 데이터 전송
         $.ajax({
           url: '/signup',
@@ -97,11 +95,22 @@
           data: JSON.stringify(userData),
           contentType: 'application/json',
           success: function (response) {
-            console.log('서버 응답:', response);
-            window.location.href = "/"
+
+            document.getElementById("openModal").addEventListener("click", function() {
+              document.getElementById("modal").style.display = "block";
+              let data = `<h5>${response} </h5>`
+              $('#profile_content').html(data);
+              window.location.href = "/"
+            });
+            
           },
           error: function (error) {
-            console.error('서버 요청 실패:', error);
+            document.getElementById("closeModal").addEventListener("click", function() {
+              document.getElementById("modal").style.display = "none";
+              let data = `<h5>${response} </h5>`
+              $('#profile_content').html(data);
+            });
+            
           }
         });
       }
