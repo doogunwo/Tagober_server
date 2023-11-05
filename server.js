@@ -184,7 +184,8 @@ app.get("/face",(req,res)=>{
     else{
       const fileName = filePath.split('/').pop(); // 'dgw0601.jpg'가 저장됩니다.
       const file = fileName.split('.').slice(0, -1).join('.'); // 'dgw0601'가 저장됩니다.
-      const path = "http://localhost:3000/Page/Data/"+file+"/"+file+".jpg"
+      const path = "http://14.49.83.210:80/Page/Data/"+file+"/"+file+".jpg"
+      console.log(path)
       html = `<img src=${path} width="120" height="120">`
       res.send(html);
     }
