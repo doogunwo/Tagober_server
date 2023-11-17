@@ -259,44 +259,43 @@ app.post('/upload', (req, res) => {
 
 
     // 이미지가 정상적으로 전송되었을 때app.use('/views', express.static(path.join(__dirname,'views')))
-    const imagePath = '/Data/'+req.session.username+'/'+req.session.username+'.jpg'
-    const root_path = 'D:/ans_server/Tagober_server';
+    const root_path = 'C:/Users/Doo/Desktop/tagober/tagober/Tagober_server';
     // 추가적인 작업 수행 가능
-    const server_path = 'Page/Data/'+req.session.username+'/'+req.session.username+'.jpg'
-
+    const server_path = '/Page/Data/'+req.session.username+'/'+req.session.username+'.jpg'
+    const path = root_path +server_path;
     //`SELECT * FROM signup WHERE username = '${username}'`
-    const query = `update sys.faceregister set imagePath = '${root_path+'/'+imagePath}' where username = '${req.session.username}'`;
+    const query = `update sys.faceregister set imagePath = '${path}' where username = '${req.session.username}'`;
     connection.query(query, (error, results) => {
       if (error) {
         console.error('Error inserting image path:', error);
         // 에러 처리
       } else {
+        
         console.log('Image path inserted successfully');
         // 성공적으로 삽입된 경우의 처리
         // flask에 update 요청넣기
+
+        app.post('/update',(req,res)=>{
+          //파이썬에 파일 업데이트 오더
+          requestData = {
+            result : 'update'
+          }
+      
+          axios.post('http://14.49.83.210:5000/update',requestData)
+            .then(response=>{
+              console.log(response.message)
+            })
+            .catch(error => {
+              
+              console.error("update error"+error);
+            });
+    
+      })
       }
     });
     return res.status(200).json({ success: true });
   });
 });
-
-app.post('/update',(req,res)=>{
-    //파이썬에 파일 업데이트 오더
-    requestData = {
-      result : 'update'
-    }
-
-    axios.post('http://14.49.83.210:82/update',requestData)
-      .then(response=>{
-        console.log(response)
-      })
-      .catch(error => {
-        
-        console.error("update error"+error);
-      });
-
-    
-})
 
 app.listen(3000, () => {
     console.log('Server is listening on port 3000!');
